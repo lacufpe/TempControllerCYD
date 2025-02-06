@@ -52,6 +52,11 @@ extern int setpointValues[100];
 extern int temperatureValues[100];
 extern int setpoint;
 
+extern lv_image_dsc_t qrcode_dsc;
+extern uint8_t qrcode_map[];
+extern void invertImage(uint8_t* data, int len);
+
+
 // Function declarations
 void touchscreen_read(lv_indev_t * indev, lv_indev_data_t * data);
 void initScreen();

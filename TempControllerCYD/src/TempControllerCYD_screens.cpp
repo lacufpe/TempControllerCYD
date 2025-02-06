@@ -71,14 +71,17 @@ void createButton(lv_obj_t * screen, const char* label, int x0, int y0, Callback
 int lastTimeScreenUpdated;
 uint32_t draw_buf[DRAW_BUF_SIZE / 4];
 
+static lv_style_t screen_style;
+
 void initScreen(){
   // Start the tft in black
   tft.init();
   tft.setRotation(1);
-  tft.fillScreen(TFT_BLACK);
+  tft.fillScreen(TFT_WHITE);
 
   lv_init();
-
+  lv_style_init(&screen_style);
+  lv_style_set_bg_color(&screen_style,lv_color_white());
   // Start the SPI for the touch screen and init the TS library
   mySpi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
   ts.begin(mySpi);
@@ -92,6 +95,7 @@ void initScreen(){
 
   lv_style_init(&title_style);
   lv_style_set_text_font(&title_style, &lv_font_montserrat_30);
+  lv_style_set_text_color(&title_style,lv_color_black());
   
   lv_indev_t * indev = lv_indev_create();
   lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
@@ -142,6 +146,7 @@ void createTitle(lv_obj_t* screen, char* title){
 
 void createCtrlScreen(){
   scrCtrl = lv_obj_create(NULL);
+  lv_obj_add_style(scrCtrl, &screen_style, 0);
   createTitle(scrCtrl,"Setup");
   createTabs(0);
   // lv_obj_t * graph_btn_label;
@@ -275,6 +280,7 @@ void create_scatter_plot(void) {
 
 void createGraphScreen(){
   scrGraph = lv_obj_create(NULL);
+  lv_obj_add_style(scrGraph, &screen_style, 0);
   createTitle(scrGraph,"Graph");
   createTabs(1);
   create_scatter_plot();
@@ -282,8 +288,15 @@ void createGraphScreen(){
 
 void createCommScreen(){
   scrComm = lv_obj_create(NULL);
+  lv_obj_add_style(scrComm, &screen_style, 0);
   createTitle(scrComm,"Comm");
   createTabs(2);
+  lv_obj_t * qrcode = lv_image_create(scrComm);
+  // invertImage(qrcode_map,qrcode_dsc.data_size);
+  /* From variable */
+  lv_image_set_src(qrcode, &qrcode_dsc);
+   lv_obj_set_pos(qrcode,80,40);
+
 }
 
 void updateScreen(){
