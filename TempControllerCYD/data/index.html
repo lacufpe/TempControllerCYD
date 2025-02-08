@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico de Temperatura</title>
+</head>
+<body>
+    <h2>Temperatura x Setpoint</h2>
+    <button onclick="enviarComando('iniciar')">Iniciar</button>
+    <button onclick="enviarComando('parar')">Parar</button>
+    <canvas id="grafico" width="400" height="200"></canvas>
+
+    <script>
+        const canvas = document.getElementById("grafico");
+        const ctx = canvas.getContext("2d");
+
+        const maxPontos = 50;
+        let tempos = [];
+        let temperaturas = [];
+        let setpoints = [];
+
+        function desenharGrafico() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Linha Temperatura
+            ctx.beginPath();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 2;
+            let stepX = canvas.width / (maxPontos - 1);
+
+            for (let i = 0; i < temperaturas.length; i++) {
+                let x = i * stepX;
+                let y = canvas.height - ((temperaturas[i]) / 100.0) * canvas.height;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Linha Setpoint
+            ctx.beginPath();
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 2;
+
+            for (let i = 0; i < setpoints.length; i++) {
+                let x = i * stepX;
+                let y = canvas.height - ((setpoints[i]) / 100.0) * canvas.height;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        function limparGrafico() {
+            tempos = [];
+            temperaturas = [];
+            setpoints = [];
+            desenharGrafico();
+        }
+
+        let socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+
+        socket.onmessage = function(event) {
+            console.log(event.data);
+            try {
+                let jsonData = JSON.parse(event.data);
+
+                if (jsonData.tipo === "limpar") {
+                    limparGrafico();
+                } else if (jsonData.tipo === "medida") {
+                    let tempo = jsonData.tempo;
+                    let temperatura = jsonData.temperatura;
+                    let setpoint = jsonData.setpoint;
+
+                    tempos.push(tempo);
+                    temperaturas.push(temperatura);
+                    setpoints.push(setpoint);
+
+                    if (tempos.length > maxPontos) {
+                        tempos.shift();
+                        temperaturas.shift();
+                        setpoints.shift();
+                    }
+
+                    desenharGrafico();
+                }
+            } catch (e) {
+                console.error("Erro ao processar mensagem WebSocket:", e);
+            }
+        };
+
+        function enviarComando(comando) {
+            socket.send(JSON.stringify({ tipo: comando }));
+        }
+
+        desenharGrafico();
+    </script>
+</body>
+</html>

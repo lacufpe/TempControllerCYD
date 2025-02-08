@@ -47,9 +47,9 @@ extern lv_obj_t *scrComm;
 extern lv_chart_series_t *tempSeries;
 extern lv_chart_series_t *setpointSeries;
 
-extern int tempo[100];
-extern int setpointValues[100];
-extern int temperatureValues[100];
+extern int timeValues[400];
+extern int setpointValues[400];
+extern int temperatureValues[400];
 extern int setpoint;
 
 extern lv_image_dsc_t qrcode_dsc;
@@ -78,3 +78,5 @@ static void event_handler_sp_slider(lv_event_t * e);
 static void event_handler_spUpDownBtn(lv_event_t * e);
 
 #endif
+
+// AMDG

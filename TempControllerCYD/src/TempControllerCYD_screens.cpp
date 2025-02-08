@@ -265,8 +265,8 @@ void create_scatter_plot(void) {
     //     y_values2[i] = 50 + 40 * cosf(2 * PI * i / POINT_COUNT);
     // }
 
-    lv_chart_set_ext_x_array(chart,tempSeries,tempo);
-    lv_chart_set_ext_x_array(chart,setpointSeries,tempo);
+    lv_chart_set_ext_x_array(chart,tempSeries,timeValues);
+    lv_chart_set_ext_x_array(chart,setpointSeries,timeValues);
     lv_chart_set_ext_y_array(chart,tempSeries,temperatureValues);
     lv_chart_set_ext_y_array(chart, setpointSeries, setpointValues);
 
