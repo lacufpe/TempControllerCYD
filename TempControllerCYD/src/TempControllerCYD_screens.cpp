@@ -50,7 +50,7 @@ void touchscreen_read(lv_indev_t * indev, lv_indev_data_t * data) {
   }
 }
 
-void createButton(lv_obj_t * screen, const char* label, int x0, int y0, CallbackType callback, bool btnEnabled){
+lv_obj_t * createButton(lv_obj_t * screen, const char* label, int x0, int y0, CallbackType callback, bool btnEnabled){
   lv_obj_t * btn_label;
   // Create a Button to change to the Graph screen
   // lv_obj_t * btn1 = lv_button_create(lv_screen_active());
@@ -66,6 +66,7 @@ void createButton(lv_obj_t * screen, const char* label, int x0, int y0, Callback
   if(!btnEnabled){
     lv_obj_add_state(btn, LV_STATE_DISABLED);
   }
+  return btn;
 }
 
 int lastTimeScreenUpdated;
@@ -286,16 +287,85 @@ void createGraphScreen(){
   create_scatter_plot();
 }
 
+lv_obj_t * serverButton;
+lv_obj_t * mainPageButton;
+lv_obj_t * setupPageButton;
+
+void event_handler_btnServerQr(lv_event_t * e){
+  lv_qrcode(String("WIFI:T:WPA;S:TempController;P:12345678;;"));
+  lv_obj_set_pos(qr,80,40);
+  lv_obj_add_state(serverButton, LV_STATE_DISABLED);
+  lv_obj_clear_state(mainPageButton, LV_STATE_DISABLED);
+  lv_obj_clear_state(setupPageButton, LV_STATE_DISABLED);
+}
+
+lv_obj_t * swNetwork;
+
+static void event_handler_swNetwork(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        LV_UNUSED(obj);
+        LV_LOG_USER("State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
+    }
+}
+
+void event_handler_btnMainPageQr(lv_event_t * e){
+  IPAddress ip;
+  if (WiFi.status() == WL_CONNECTED) {
+    ip = WiFi.localIP();
+  } else if (WiFi.getMode() & WIFI_AP) { // Check if SoftAP is enabled
+    ip = WiFi.softAPIP();
+  }
+  String url = "http://" + ip.toString() + ":80/";
+  lv_qrcode(url);
+  lv_obj_set_pos(qr,80,40);
+  lv_obj_clear_state(serverButton, LV_STATE_DISABLED);
+  lv_obj_add_state(mainPageButton, LV_STATE_DISABLED);
+  lv_obj_clear_state(setupPageButton, LV_STATE_DISABLED);    
+}
+
+void event_handler_btnSetupPageQr(lv_event_t * e){
+  String ipStr = WiFi.softAPIP().toString();
+  String url = "http://" + ipStr + ":80/setup.html";
+  lv_qrcode(url);
+  lv_obj_set_pos(qr,80,40);
+  lv_obj_clear_state(serverButton, LV_STATE_DISABLED);
+  lv_obj_clear_state(mainPageButton, LV_STATE_DISABLED);
+  lv_obj_add_state(setupPageButton, LV_STATE_DISABLED);
+}
+
 void createCommScreen(){
   scrComm = lv_obj_create(NULL);
   lv_obj_add_style(scrComm, &screen_style, 0);
   createTitle(scrComm,"Comm");
   createTabs(2);
-  lv_obj_t * qrcode = lv_image_create(scrComm);
-  // invertImage(qrcode_map,qrcode_dsc.data_size);
-  /* From variable */
-  lv_image_set_src(qrcode, &qrcode_dsc);
-   lv_obj_set_pos(qrcode,80,40);
+
+  serverButton = createButton(scrComm, "Server", 240, 0, event_handler_btnServerQr, false);
+  mainPageButton = createButton(scrComm, "Main page", 240, 32, event_handler_btnMainPageQr, true);
+  setupPageButton = createButton(scrComm, "Setup page", 240, 64, event_handler_btnSetupPageQr, true);
+  lv_obj_set_size(serverButton,80,32);
+  lv_obj_set_size(mainPageButton,80,32);
+  lv_obj_set_size(setupPageButton,80,32);
+
+
+  lv_qrcode("WIFI:T:WPA;S:TempController;P:12345678;;");
+  lv_obj_set_pos(qr,80,40);
+  
+  swNetwork = lv_switch_create(scrComm);
+  lv_obj_add_event_cb(swNetwork, event_handler_swNetwork, LV_EVENT_ALL, NULL);
+  lv_obj_align_to(swNetwork,qr,LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+
+  lv_obj_t * labelNetAP = lv_label_create(scrComm);
+  lv_label_set_text(labelNetAP,"AP");
+  lv_obj_align_to(labelNetAP,swNetwork,LV_ALIGN_OUT_LEFT_MID,0,0);
+
+  lv_obj_t * labelNetLocal = lv_label_create(scrComm);
+  lv_label_set_text(labelNetLocal,"Local Net");
+  lv_obj_align_to(labelNetLocal,swNetwork,LV_ALIGN_OUT_RIGHT_MID,0,0);
+
+  // lv_obj_add_state(sw, LV_STATE_DISABLED);
 
 }
 

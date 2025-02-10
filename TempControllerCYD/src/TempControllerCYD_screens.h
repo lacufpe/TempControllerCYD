@@ -9,6 +9,8 @@
 #include <XPT2046_Touchscreen.h>
 #include <TFT_eSPI.h>
 #include <lvgl.h>
+#include "myWebServer.h"
+// #include <string.h>
 
 // Typedef for callbacks
 typedef void (*CallbackType)(lv_event_t * e);
@@ -52,9 +54,6 @@ extern int setpointValues[400];
 extern int temperatureValues[400];
 extern int setpoint;
 
-extern lv_image_dsc_t qrcode_dsc;
-extern uint8_t qrcode_map[];
-extern void invertImage(uint8_t* data, int len);
 
 
 // Function declarations
@@ -65,6 +64,9 @@ void createGraphScreen();
 void createCommScreen();
 void updateScreen();
 void createButton(lv_obj_t * screen, String label, int x0, int y0, CallbackType callback, bool btnEnabled);
+
+extern lv_obj_t * qr;
+void lv_qrcode(String data);
 
 // Callbacks that is triggered when btn1 is clicked
 static void event_handler_btnCtrl(lv_event_t * e);
