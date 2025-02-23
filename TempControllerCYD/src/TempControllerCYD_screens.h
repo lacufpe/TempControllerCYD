@@ -10,6 +10,7 @@
 #include <TFT_eSPI.h>
 #include <lvgl.h>
 #include "myWebServer.h"
+#include "betterSlider.h"
 // #include <string.h>
 
 // Typedef for callbacks
@@ -54,6 +55,9 @@ extern int setpointValues[400];
 extern int temperatureValues[400];
 extern int setpoint;
 
+extern BetterSlider* setPoint;
+extern BetterSlider* hysteresis;
+extern BetterSlider* deltaT;
 
 
 // Function declarations
@@ -79,6 +83,8 @@ extern lv_obj_t * sp_slider_label;
 static void event_handler_sp_slider(lv_event_t * e);
 static void event_handler_spUpDownBtn(lv_event_t * e);
 
+extern lv_obj_t * heaterSymbolCtrl;
+extern lv_obj_t * heaterSymbolGraph;
 #endif
 
 // AMDG

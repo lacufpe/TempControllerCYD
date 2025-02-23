@@ -1,5 +1,5 @@
 #include "TempControllerCYD_screens.h"
-
+#include "betterSlider.h"
 
 // Global objects
 TFT_eSPI tft = TFT_eSPI();
@@ -77,7 +77,7 @@ static lv_style_t screen_style;
 void initScreen(){
   // Start the tft in black
   tft.init();
-  tft.setRotation(1);
+  tft.setRotation(3);
   tft.fillScreen(TFT_WHITE);
 
   lv_init();
@@ -92,7 +92,7 @@ void initScreen(){
   lv_display_t * disp;
   // Initialize the TFT display using the TFT_eSPI library
   disp = lv_tft_espi_create(SCREEN_WIDTH, SCREEN_HEIGHT, draw_buf, sizeof(draw_buf));
-  lv_display_set_rotation(disp, LV_DISPLAY_ROTATION_270);
+  lv_display_set_rotation(disp, LV_DISPLAY_ROTATION_90);
 
   lv_style_init(&title_style);
   lv_style_set_text_font(&title_style, &lv_font_montserrat_30);
@@ -134,7 +134,7 @@ void createTabs(int screen){
   }
 }
 
-void createTitle(lv_obj_t* screen, char* title){
+void createTitle(lv_obj_t* screen, const char* title){
   // Screen title aligned center on top
   lv_obj_t * title_label = lv_label_create(screen);
   // lv_label_set_long_mode(text_label, LV_LABEL_LONG_WRAP);    // Breaks the long lines
@@ -143,6 +143,48 @@ void createTitle(lv_obj_t* screen, char* title){
   lv_obj_set_style_text_align(title_label, LV_TEXT_ALIGN_CENTER, 0);
   lv_obj_align(title_label, LV_ALIGN_CENTER, 0, -100);
   lv_obj_add_style(title_label, &title_style, 0); 
+}
+
+lv_obj_t * heaterSymbolCtrl;
+lv_obj_t * heaterSymbolGraph;
+
+lv_style_t onStyle;
+lv_style_t offStyle;
+
+
+void heaterOn(bool on) {
+  if (heaterSymbolCtrl == nullptr) {
+    Serial.println("ERROR: chargeSymbol is NULL!");
+    return; // Or handle the error appropriately
+  }
+  
+    if (on) {
+      lv_obj_remove_style(heaterSymbolCtrl, &offStyle,LV_STATE_ANY|LV_PART_ANY);
+      lv_obj_add_style(heaterSymbolCtrl, &onStyle, 0);      // Add on style
+  } else {
+      lv_obj_replace_style(heaterSymbolCtrl, &onStyle, &offStyle, LV_STATE_ANY|LV_PART_ANY);      // Add on style
+  }
+}
+
+void createHeaterSymbol(lv_obj_t * screen, lv_obj_t * heaterSymbol) {
+  heaterSymbol = lv_label_create(screen); // Or whatever parent object
+  lv_label_set_text(heaterSymbol, LV_SYMBOL_CHARGE);
+  lv_obj_set_pos(heaterSymbol,30,160);
+
+  static lv_style_t style;
+  lv_style_init(&style);
+  lv_style_set_text_font(&style, &lv_font_montserrat_48); // Example: Montserrat font size 24
+  lv_obj_add_style(heaterSymbol, &style, 0); // 0 means apply to all parts of the object
+
+  lv_style_init(&onStyle);
+  lv_style_set_text_color(&onStyle, lv_color_make(255,0,0)); // Red
+
+  lv_style_init(&offStyle);
+  lv_style_set_text_color(&offStyle, lv_color_make(0,0,255)); // Blue
+  
+  lv_obj_add_style(heaterSymbol, &offStyle, 0);
+
+// heaterOn(false);
 }
 
 void createCtrlScreen(){
@@ -165,54 +207,23 @@ void createCtrlScreen(){
   // Create a Toggle button (btn2)
   // lv_obj_t * btn2 = lv_button_create(lv_screen_active());
   
-  // Create a slider aligned in the center bottom of the TFT display
-  sp_slider = lv_slider_create(scrCtrl);
-  lv_obj_align(sp_slider, LV_ALIGN_CENTER, 0, 60);
-  lv_obj_add_event_cb(sp_slider, event_handler_sp_slider, LV_EVENT_VALUE_CHANGED, NULL);
-  lv_slider_set_range(sp_slider, 0, 100);
-  lv_obj_set_style_anim_duration(sp_slider, 2000, 0);
+  //  BetterSlider(lv_obj_t* parent, int width, int x, int y, const char* title, const char* unit, int minVal, int maxVal);
+  // Serial.println("Antes dos Sliders");
+  BetterSlider* setPoint = new BetterSlider(scrCtrl, 200, 100, 30, "Setpoint", "°C", 0, 100);
+  // Serial.println("1 Slider");
+  BetterSlider* hysteresis = new BetterSlider(scrCtrl, 200, 100, 100, "Histerese", "°C", 1, 10);
+  // Serial.println("2 Sliders");
+  BetterSlider* deltaT = new BetterSlider(scrCtrl, 200, 100, 170, "deltaT", "s", 1, 120);
+  // Serial.println("3 Sliders");
 
-  // Create a label below the slider to display the current slider value
-  // slider_label = lv_label_create(lv_screen_active());
-  sp_slider_label = lv_label_create(scrCtrl);
-  lv_label_set_text(sp_slider_label, "0 °C");
-  lv_obj_align_to(sp_slider_label, sp_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
-  lv_obj_t * sp_0_label = lv_label_create(scrCtrl);
-  lv_label_set_text(sp_0_label, "0 °C");
-  lv_obj_align_to(sp_0_label, sp_slider, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
-  lv_obj_t * sp_100_label = lv_label_create(scrCtrl);
-  lv_label_set_text(sp_100_label, "100 °C");
-  lv_obj_align_to(sp_100_label, sp_slider, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 10);
-  lv_scr_load(scrCtrl);
+  // Create Experiment control interface
+  createButton(scrCtrl,LV_SYMBOL_PLAY, 5,110,event_handler_btnGraph,true);
+  createButton(scrCtrl,LV_SYMBOL_STOP, 45,110,event_handler_btnGraph,false);
 
-  lv_obj_t * spUpbtnLabel;
-  // Create a Button to change to the Graph screen
-  // lv_obj_t * btn1 = lv_button_create(lv_screen_active());
-  lv_obj_t * spUpBtn = lv_button_create(scrCtrl);
-  static int updata = 1;
-  lv_obj_add_event_cb(spUpBtn, event_handler_spUpDownBtn, LV_EVENT_ALL,&updata);
-  lv_obj_align_to(spUpBtn, sp_slider_label, LV_ALIGN_CENTER, 40, 0);
-  lv_obj_remove_flag(spUpBtn, LV_OBJ_FLAG_PRESS_LOCK);
-  lv_obj_set_size(spUpBtn,20,20);
-
-  spUpbtnLabel = lv_label_create(spUpBtn);
-  lv_label_set_text(spUpbtnLabel, "+");
-  lv_obj_center(spUpbtnLabel);
-
-  lv_obj_t * spDownbtnLabel;
-  // Create a Button to change to the Graph screen
-  // lv_obj_t * btn1 = lv_button_create(lv_screen_active());
-  lv_obj_t * spDownBtn = lv_button_create(scrCtrl);
-  static int downdata = -1;
-  lv_obj_add_event_cb(spDownBtn, event_handler_spUpDownBtn, LV_EVENT_ALL,&downdata);
-  lv_obj_align_to(spDownBtn, sp_slider_label, LV_ALIGN_CENTER, -40, 0);
-  lv_obj_remove_flag(spDownBtn, LV_OBJ_FLAG_PRESS_LOCK);
-  lv_obj_set_size(spDownBtn,20,20);
-
-  spDownbtnLabel = lv_label_create(spDownBtn);
-  lv_label_set_text(spDownbtnLabel, "-");
-  lv_obj_center(spDownbtnLabel);
+  createHeaterSymbol(scrCtrl,heaterSymbolCtrl);
   
+  lv_scr_load(scrCtrl);
+   
 }
 
 void create_scatter_plot(void) {
@@ -285,6 +296,16 @@ void createGraphScreen(){
   createTitle(scrGraph,"Graph");
   createTabs(1);
   create_scatter_plot();
+
+  // Create Experiment control interface
+  createButton(scrGraph,LV_SYMBOL_PLAY, 5,110,event_handler_btnGraph,true);
+  createButton(scrGraph,LV_SYMBOL_STOP, 45,110,event_handler_btnGraph,false);
+
+  createHeaterSymbol(scrGraph,heaterSymbolGraph);
+  heaterOn(true);
+  
+  lv_obj_refresh_style(heaterSymbolCtrl,LV_PART_ANY,LV_STYLE_PROP_ANY);
+
 }
 
 lv_obj_t * serverButton;
