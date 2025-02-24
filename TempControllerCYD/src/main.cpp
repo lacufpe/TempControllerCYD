@@ -13,12 +13,16 @@ bool aquisicaoAtiva = false; // Verdadeiro se aqdquirindo dados
 
 Controller* controller = nullptr;
 
+int temperaturaAtual,setPoint,heaterStatus,hysteresis, deltaT;
+
 void startAcq(){
+  Serial.println("Started acquisition");
   aquisicaoAtiva = true;
   controller->start();
 }
 
 void stopAcq(){
+  Serial.println("Stoped acquiring");
   aquisicaoAtiva = false;
   controller->stop();
 }
@@ -33,18 +37,18 @@ void setup() {
     setpointValues[i] = 50 + 40 * sinf(2 * PI * i / 50);
     temperatureValues[i] = 50 + 40 * cosf(2 * PI * i / 100);
   }
-  MAX6675 thermocouple(thermoCLK, thermoCS, thermoSO);
-  Serial.println("Antes do controlador");
+  static MAX6675 thermocouple(thermoCLK, thermoCS, thermoSO);
+  delay(500);
   controller = new Controller(&thermocouple);
-  Serial.println("Depoiss do controlador");
   controller->setSetpoint(100,10);
-  Serial.println("Depois do setpoint");
 }
 
 void loop(){
+  controller->controlLoop();
+  temperaturaAtual = controller->getValue();
+  heaterStatus = controller->getHeaterStatus();
   updateScreen();
   handleNetwork();
-  controller->controlLoop();
 }
 
 //AMDG

@@ -145,6 +145,28 @@ void createTitle(lv_obj_t* screen, const char* title){
   lv_obj_add_style(title_label, &title_style, 0); 
 }
 
+////// Start and Stop Buttons ///////
+lv_obj_t * startBtnCtrl;
+lv_obj_t * stopBtnCtrl;
+lv_obj_t * startBtnGraph;
+lv_obj_t * stopBtnGraph;
+
+void event_handler_btnStart(lv_event_t * e){
+  lv_obj_add_state(startBtnCtrl, LV_STATE_DISABLED);
+  lv_obj_remove_state(stopBtnCtrl, LV_STATE_DISABLED);
+  lv_obj_add_state(startBtnGraph, LV_STATE_DISABLED);
+  lv_obj_remove_state(stopBtnGraph, LV_STATE_DISABLED);
+  startAcq();
+}
+
+void event_handler_btnStop(lv_event_t * e){
+  lv_obj_remove_state(startBtnCtrl, LV_STATE_DISABLED);
+  lv_obj_add_state(stopBtnCtrl, LV_STATE_DISABLED);
+  lv_obj_remove_state(startBtnGraph, LV_STATE_DISABLED);
+  lv_obj_add_state(stopBtnGraph, LV_STATE_DISABLED);
+  stopAcq();
+}
+////// Heater Symbol /////
 lv_obj_t * heaterSymbolCtrl;
 lv_obj_t * heaterSymbolGraph;
 
@@ -159,8 +181,9 @@ void heaterOn(bool on) {
   }
   
   if (on) {
-      lv_obj_remove_style(heaterSymbolCtrl, &offStyle,0);
-      lv_obj_add_style(heaterSymbolCtrl, &onStyle, 0);      // Add on style
+      lv_obj_replace_style(heaterSymbolCtrl, &offStyle, &onStyle, 0);      // Add on style
+      // lv_obj_remove_style(heaterSymbolCtrl, &offStyle,0);
+      // lv_obj_add_style(heaterSymbolCtrl, &onStyle, 0);      // Add on style
   } else {
       lv_obj_replace_style(heaterSymbolCtrl, &onStyle, &offStyle, 0);      // Add off style
   }
@@ -177,14 +200,14 @@ void createHeaterSymbol(lv_obj_t * screen, lv_obj_t * heaterSymbol) {
   lv_obj_add_style(heaterSymbol, &style, 0); // 0 means apply to all parts of the object
 
   // static lv_style_t onStyle;
-  // lv_style_init(&onStyle);
-  // lv_style_set_text_color(&onStyle, lv_color_make(255,0,0)); // Red
+  lv_style_init(&onStyle);
+  lv_style_set_text_color(&onStyle, lv_color_make(255,0,0)); // Red
 
   // // static lv_style_t offStyle;
-  // lv_style_init(&offStyle);
-  // lv_style_set_text_color(&offStyle, lv_color_make(0,0,255)); // Blue
+  lv_style_init(&offStyle);
+  lv_style_set_text_color(&offStyle, lv_color_make(0,0,255)); // Blue
   
-  // lv_obj_add_style(heaterSymbol, &offStyle, 0);
+  lv_obj_add_style(heaterSymbol, &offStyle, 0);
 
 // heaterOn(false);
 }
@@ -211,16 +234,16 @@ void createCtrlScreen(){
   
   //  BetterSlider(lv_obj_t* parent, int width, int x, int y, const char* title, const char* unit, int minVal, int maxVal);
   // Serial.println("Antes dos Sliders");
-  BetterSlider* setPoint = new BetterSlider(scrCtrl, 200, 100, 30, "Setpoint", "°C", 0, 1000);
+  BetterSlider* setPointSlider = new BetterSlider(scrCtrl, 200, 100, 30, "Setpoint", "°C", 0, 1000);
   // Serial.println("1 Slider");
-  BetterSlider* hysteresis = new BetterSlider(scrCtrl, 200, 100, 100, "Histerese", "°C", 1, 20);
+  BetterSlider* hysteresisSlider = new BetterSlider(scrCtrl, 200, 100, 100, "Histerese", "°C", 1, 20);
   // Serial.println("2 Sliders");
-  BetterSlider* deltaT = new BetterSlider(scrCtrl, 200, 100, 170, "deltaT", "s", 1, 120);
+  BetterSlider* deltaTSlider = new BetterSlider(scrCtrl, 200, 100, 170, "deltaT", "s", 1, 120);
   // Serial.println("3 Sliders");
 
   // Create Experiment control interface
-  createButton(scrCtrl,LV_SYMBOL_PLAY, 5,110,event_handler_btnGraph,true);
-  createButton(scrCtrl,LV_SYMBOL_STOP, 45,110,event_handler_btnGraph,false);
+  startBtnCtrl = createButton(scrCtrl,LV_SYMBOL_PLAY, 5,110,event_handler_btnStart,true);
+  stopBtnCtrl  = createButton(scrCtrl,LV_SYMBOL_STOP, 45,110,event_handler_btnStop,false);
 
   createHeaterSymbol(scrCtrl,heaterSymbolCtrl);
   
@@ -300,11 +323,11 @@ void createGraphScreen(){
   create_scatter_plot();
 
   // Create Experiment control interface
-  createButton(scrGraph,LV_SYMBOL_PLAY, 5,110,event_handler_btnGraph,true);
-  createButton(scrGraph,LV_SYMBOL_STOP, 45,110,event_handler_btnGraph,false);
+  startBtnGraph = createButton(scrGraph,LV_SYMBOL_PLAY, 5,110,event_handler_btnStart,true);
+  stopBtnGraph  = createButton(scrGraph,LV_SYMBOL_STOP, 45,110,event_handler_btnStop,false);
 
   createHeaterSymbol(scrGraph,heaterSymbolGraph);
-  // heaterOn(true);
+  heaterOn(true);
   
   // lv_obj_refresh_style(heaterSymbolCtrl,LV_PART_ANY,LV_STYLE_PROP_ANY);
 

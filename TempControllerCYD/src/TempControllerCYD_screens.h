@@ -11,6 +11,7 @@
 #include <lvgl.h>
 #include "myWebServer.h"
 #include "betterSlider.h"
+#include "control.h"
 // #include <string.h>
 
 // Typedef for callbacks
@@ -54,10 +55,13 @@ extern int timeValues[400];
 extern int setpointValues[400];
 extern int temperatureValues[400];
 extern int setpoint;
+extern int temperaturaAtual, setPoint, heaterStatus;
 
-extern BetterSlider* setPoint;
-extern BetterSlider* hysteresis;
-extern BetterSlider* deltaT;
+extern BetterSlider* setPointSlider;
+extern BetterSlider* hysteresisSLider;
+extern BetterSlider* deltaTSlider;
+
+extern Controller* controller;
 
 extern lv_obj_t * heaterSymbolCtrl;
 extern lv_obj_t * heaterSymbolGraph;

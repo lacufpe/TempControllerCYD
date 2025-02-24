@@ -15,11 +15,11 @@
 class Controller {
 private:
     MAX6675* thermocouple;
-    int value;
+    float value;
     int relayValue;
-    int setPoint;
-    int minValue;
-    int maxValue;
+    float setPoint;
+    float minValue;
+    float maxValue;
     int state;
     int next;
 
@@ -28,7 +28,7 @@ public:
     ~Controller(); // Destructor
     void controlLoop();
     int getSetpoint();
-    int getValue();
+    float getValue();
     int getHeaterStatus();
     void setSetpoint(int setpoint, int histerese);
     void start();

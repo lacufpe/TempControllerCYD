@@ -4,6 +4,8 @@
 
 #include <lvgl.h>
 
+extern int temperaturaAtual,setPoint,heaterStatus,hysteresis,deltaT;
+
 class BetterSlider {
 private:
     lv_obj_t* slider;
@@ -13,6 +15,7 @@ private:
     lv_obj_t* upButton;
     lv_obj_t* downButton;
     lv_obj_t* titleLabel;
+    const char* title;
     int minValue;
     int maxValue;
     const char* unit;

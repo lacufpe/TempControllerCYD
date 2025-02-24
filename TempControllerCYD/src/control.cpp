@@ -17,13 +17,20 @@ Controller::~Controller() {
 }
 
 void Controller::controlLoop(){
-    Serial.print("NExt: ");
-    Serial.println(next);
-    Serial.print("Millis(): ");
-    Serial.println(millis());
     if(millis()>=next){
         next +=controlDeltaT;
         value = thermocouple->readCelsius();
+        Serial.print("T: ");
+        Serial.print(value);
+        Serial.print(". Status: ");
+        Serial.print(state);
+        Serial.print(". minValue: ");
+        Serial.print(minValue);
+        Serial.print(". maxValue: ");
+        Serial.print(maxValue);
+        Serial.print(". relayValue: ");
+        Serial.println(relayValue);
+        
         switch(state){
         case 0: // stopped
             relayValue = 0;
@@ -53,7 +60,7 @@ int Controller::getSetpoint(){
     return setPoint;
 }
 
-int Controller::getValue(){
+float Controller::getValue(){
     return value;
 }
 

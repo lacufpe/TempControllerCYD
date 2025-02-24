@@ -1,9 +1,10 @@
 // betterSlider.cpp
 #include "betterSlider.h"
+#include "TempControllerCYD_screens.h"
 #include <stdio.h> // For snprintf
 
 BetterSlider::BetterSlider(lv_obj_t* parent, int width, int x, int y, const char* title, const char* unit, int minVal, int maxVal) :
-    minValue(minVal), maxValue(maxVal), unit(unit) {
+    minValue(minVal), maxValue(maxVal), unit(unit), title(title) {
 
     titleLabel = lv_label_create(parent);
     lv_label_set_text(titleLabel, title);
@@ -95,6 +96,15 @@ void BetterSlider::updateLabel() {
 void BetterSlider::sliderEventHandler(lv_event_t* e) {
     BetterSlider* instance = static_cast<BetterSlider*>(e->user_data);
     instance->updateLabel();
+    if (instance->title == "Setpoint"){
+        setPoint = lv_slider_get_value(instance->slider);
+        controller->setSetpoint(setPoint,hysteresis);
+    } else if (instance->title == "Histerese"){
+        hysteresis = lv_slider_get_value(instance->slider);
+        controller->setSetpoint(setPoint,hysteresis);
+    } else if (instance->title == "deltaT"){
+        deltaT = lv_slider_get_value(instance->slider);
+    } 
 }
 
 void BetterSlider::buttonEventHandler(lv_event_t* e) {
@@ -110,4 +120,13 @@ void BetterSlider::buttonEventHandler(lv_event_t* e) {
 
     int newValue = instance->getValue() + increment;
     instance->setValue(newValue);
+    if (instance->title == "Setpoint"){
+        setPoint = newValue;
+        controller->setSetpoint(setPoint,hysteresis);
+    } else if (instance->title == "Histerese"){
+        hysteresis = newValue;
+        controller->setSetpoint(setPoint,hysteresis);
+    } else if (instance->title == "deltaT"){
+        deltaT = newValue;
+    }
 }
