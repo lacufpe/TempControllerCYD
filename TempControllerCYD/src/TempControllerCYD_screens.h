@@ -59,6 +59,12 @@ extern BetterSlider* setPoint;
 extern BetterSlider* hysteresis;
 extern BetterSlider* deltaT;
 
+extern lv_obj_t * heaterSymbolCtrl;
+extern lv_obj_t * heaterSymbolGraph;
+
+// extern lv_style_t onStyle;
+// extern lv_style_t offStyle;
+
 
 // Function declarations
 void touchscreen_read(lv_indev_t * indev, lv_indev_data_t * data);

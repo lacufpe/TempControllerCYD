@@ -148,8 +148,8 @@ void createTitle(lv_obj_t* screen, const char* title){
 lv_obj_t * heaterSymbolCtrl;
 lv_obj_t * heaterSymbolGraph;
 
-lv_style_t onStyle;
-lv_style_t offStyle;
+static lv_style_t onStyle;
+static lv_style_t offStyle;
 
 
 void heaterOn(bool on) {
@@ -158,11 +158,11 @@ void heaterOn(bool on) {
     return; // Or handle the error appropriately
   }
   
-    if (on) {
-      lv_obj_remove_style(heaterSymbolCtrl, &offStyle,LV_STATE_ANY|LV_PART_ANY);
+  if (on) {
+      lv_obj_remove_style(heaterSymbolCtrl, &offStyle,0);
       lv_obj_add_style(heaterSymbolCtrl, &onStyle, 0);      // Add on style
   } else {
-      lv_obj_replace_style(heaterSymbolCtrl, &onStyle, &offStyle, LV_STATE_ANY|LV_PART_ANY);      // Add on style
+      lv_obj_replace_style(heaterSymbolCtrl, &onStyle, &offStyle, 0);      // Add off style
   }
 }
 
@@ -176,13 +176,15 @@ void createHeaterSymbol(lv_obj_t * screen, lv_obj_t * heaterSymbol) {
   lv_style_set_text_font(&style, &lv_font_montserrat_48); // Example: Montserrat font size 24
   lv_obj_add_style(heaterSymbol, &style, 0); // 0 means apply to all parts of the object
 
-  lv_style_init(&onStyle);
-  lv_style_set_text_color(&onStyle, lv_color_make(255,0,0)); // Red
+  // static lv_style_t onStyle;
+  // lv_style_init(&onStyle);
+  // lv_style_set_text_color(&onStyle, lv_color_make(255,0,0)); // Red
 
-  lv_style_init(&offStyle);
-  lv_style_set_text_color(&offStyle, lv_color_make(0,0,255)); // Blue
+  // // static lv_style_t offStyle;
+  // lv_style_init(&offStyle);
+  // lv_style_set_text_color(&offStyle, lv_color_make(0,0,255)); // Blue
   
-  lv_obj_add_style(heaterSymbol, &offStyle, 0);
+  // lv_obj_add_style(heaterSymbol, &offStyle, 0);
 
 // heaterOn(false);
 }
@@ -209,9 +211,9 @@ void createCtrlScreen(){
   
   //  BetterSlider(lv_obj_t* parent, int width, int x, int y, const char* title, const char* unit, int minVal, int maxVal);
   // Serial.println("Antes dos Sliders");
-  BetterSlider* setPoint = new BetterSlider(scrCtrl, 200, 100, 30, "Setpoint", "°C", 0, 100);
+  BetterSlider* setPoint = new BetterSlider(scrCtrl, 200, 100, 30, "Setpoint", "°C", 0, 1000);
   // Serial.println("1 Slider");
-  BetterSlider* hysteresis = new BetterSlider(scrCtrl, 200, 100, 100, "Histerese", "°C", 1, 10);
+  BetterSlider* hysteresis = new BetterSlider(scrCtrl, 200, 100, 100, "Histerese", "°C", 1, 20);
   // Serial.println("2 Sliders");
   BetterSlider* deltaT = new BetterSlider(scrCtrl, 200, 100, 170, "deltaT", "s", 1, 120);
   // Serial.println("3 Sliders");
@@ -240,7 +242,7 @@ void create_scatter_plot(void) {
 
     /* Set the range of the chart */
     lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_X, 0, 1000);
-    lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
+    lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 1000);
 
     /* Create a style for the series (optional) */
     static lv_style_t series_style;
@@ -302,9 +304,9 @@ void createGraphScreen(){
   createButton(scrGraph,LV_SYMBOL_STOP, 45,110,event_handler_btnGraph,false);
 
   createHeaterSymbol(scrGraph,heaterSymbolGraph);
-  heaterOn(true);
+  // heaterOn(true);
   
-  lv_obj_refresh_style(heaterSymbolCtrl,LV_PART_ANY,LV_STYLE_PROP_ANY);
+  // lv_obj_refresh_style(heaterSymbolCtrl,LV_PART_ANY,LV_STYLE_PROP_ANY);
 
 }
 
