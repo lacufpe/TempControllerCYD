@@ -4,7 +4,8 @@
 
 #include <lvgl.h>
 
-extern int temperaturaAtual,setPoint,heaterStatus,hysteresis,deltaT;
+extern float temperaturaAtual;
+extern int setPoint,heaterStatus,hysteresis,deltaT;
 
 class BetterSlider {
 private:
@@ -37,3 +38,4 @@ private:
 };
 
 #endif
+// AMDG

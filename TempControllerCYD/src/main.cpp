@@ -3,22 +3,33 @@
 #include <DS18B20.h>
 #include "myWebServer.h"
 #include "control.h"
+#include "fileAccess.h"
 
 int MaxAcq = 400;
 int timeValues[400];
 int setpointValues[400];
 int temperatureValues[400];
 int measIdx = 0;
+int tempoEmSegundos, tempoInicio, tempoProximaMedida;
+int deltaT = 1;
 bool aquisicaoAtiva = false; // Verdadeiro se aqdquirindo dados
+
+String filename;
 
 Controller* controller = nullptr;
 
-int temperaturaAtual,setPoint,heaterStatus,hysteresis, deltaT;
+float temperaturaAtual;
+int setPoint,heaterStatus,hysteresis;
 
 void startAcq(){
   Serial.println("Started acquisition");
   aquisicaoAtiva = true;
   controller->start();
+  tempoInicio = millis();
+  tempoProximaMedida = tempoInicio;
+  tempoEmSegundos = 0;
+  measIdx = 0;
+  filename = initializeNewFile();
 }
 
 void stopAcq(){
@@ -28,27 +39,42 @@ void stopAcq(){
 }
 
 void setup() {
-  Serial.begin(115200);
-  startNetwork();
-  // SPIFFS_test();
-  initScreen();
-  for(int i =0;i<MaxAcq;i++){
-    timeValues[i] = 10*i;
-    setpointValues[i] = 50 + 40 * sinf(2 * PI * i / 50);
-    temperatureValues[i] = 50 + 40 * cosf(2 * PI * i / 100);
-  }
-  static MAX6675 thermocouple(thermoCLK, thermoCS, thermoSO);
-  delay(500);
-  controller = new Controller(&thermocouple);
-  controller->setSetpoint(100,10);
+  Serial.begin(115200); // Start serial communication through USB
+  startFS(); // Starts SPIFFS (from fileAccess.h)
+  startNetwork(); // Starts the network (from myWebServer.h)
+  initScreen(); // from TempControllerCYD_screens.h
+  static MAX6675 thermocouple(thermoCLK, thermoCS, thermoSO); // Initiates the thermcouple
+  delay(500); // and give it time to correctly start
+  controller = new Controller(&thermocouple); // Create the temperatura controller (from controller.h)
+  controller->setSetpoint(100,1); // and set the setpoint and hysteresis (from controller.h)
 }
 
 void loop(){
-  controller->controlLoop();
-  temperaturaAtual = controller->getValue();
-  heaterStatus = controller->getHeaterStatus();
-  updateScreen();
-  handleNetwork();
+  controller->controlLoop(); // (from controller.h)
+  temperaturaAtual = controller->getValue(); // get the temperature value of the thermocouple (from controller.h)
+  heaterStatus = controller->getHeaterStatus(); // And get if the heater is on or off (from controller.h)
+  updateScreen(); // from TempCOntrollerCYD_screens.h
+  handleNetwork(); // from myWebServer.h
+
+  //acquisition loop
+  if (aquisicaoAtiva){ // Se estiver fazendo aquisição
+    int agora = millis();
+    if (agora >= tempoProximaMedida){ //Checa se é tempo de fazer outra medida
+      tempoEmSegundos = (tempoProximaMedida - tempoInicio)/1000; // Salva o tempo em segundos
+      // Salva no array circular que faz o gráfico
+      int arrayIdx = measIdx%MaxAcq; //Define um índice para o array circular do gráfico
+      timeValues[arrayIdx] = tempoEmSegundos; 
+      temperatureValues[arrayIdx] = temperaturaAtual;
+      setpointValues[arrayIdx] = setPoint;
+
+      //Salva no arquivo 
+      appendToCSV(filename.c_str(),createCSVLine(tempoEmSegundos,temperaturaAtual,setPoint));
+      
+      measIdx++; // Atualiza o índice das medidas
+      tempoProximaMedida += deltaT*1000; // e define o tempo da próxima medida
+    }
+  }
+
 }
 
 //AMDG

@@ -109,6 +109,9 @@ void initScreen(){
   createCommScreen();
   
   lastTimeScreenUpdated = millis();
+  // Create a timer to update the label every 100 milliseconds
+  lv_timer_create(update_Tlabel_task, 100, NULL);
+
 }
 
 void createTabs(int screen){
@@ -176,7 +179,7 @@ static lv_style_t offStyle;
 
 void heaterOn(bool on) {
   if (heaterSymbolCtrl == nullptr) {
-    Serial.println("ERROR: chargeSymbol is NULL!");
+    // Serial.println("ERROR: chargeSymbol is NULL!");
     return; // Or handle the error appropriately
   }
   
@@ -192,11 +195,11 @@ void heaterOn(bool on) {
 void createHeaterSymbol(lv_obj_t * screen, lv_obj_t * heaterSymbol) {
   heaterSymbol = lv_label_create(screen); // Or whatever parent object
   lv_label_set_text(heaterSymbol, LV_SYMBOL_CHARGE);
-  lv_obj_set_pos(heaterSymbol,30,160);
+  lv_obj_set_pos(heaterSymbol,30,150);
 
   static lv_style_t style;
   lv_style_init(&style);
-  lv_style_set_text_font(&style, &lv_font_montserrat_48); // Example: Montserrat font size 24
+  lv_style_set_text_font(&style, &lv_font_montserrat_36);
   lv_obj_add_style(heaterSymbol, &style, 0); // 0 means apply to all parts of the object
 
   // static lv_style_t onStyle;
@@ -211,6 +214,37 @@ void createHeaterSymbol(lv_obj_t * screen, lv_obj_t * heaterSymbol) {
 
 // heaterOn(false);
 }
+
+
+////// temperatureValue ///////
+lv_obj_t *TlabelCtrl;
+lv_obj_t *TlabelGraph;
+
+////// timeValue ///////
+lv_obj_t *TimeLabelCtrl;
+lv_obj_t *TimeLabelGraph;
+
+void update_Tlabel_task(lv_timer_t *timer) {
+  char buffer[32]; // Buffer to hold the formatted string
+
+  // Format the float into the buffer
+  snprintf(buffer, sizeof(buffer), "%.2f", temperaturaAtual); // %.2f shows 2 decimal places
+
+  // Update the label's text
+  lv_label_set_text(TlabelCtrl, buffer);
+  lv_label_set_text(TlabelGraph, buffer);
+
+  // Now update the time label
+  snprintf(buffer, sizeof(buffer), "%d s", tempoEmSegundos); // %d for integer
+
+  // Update the label's text
+  lv_label_set_text(TimeLabelCtrl, buffer);
+  lv_label_set_text(TimeLabelGraph, buffer);
+
+  heaterOn(heaterStatus==1?true:false);
+
+}
+
 
 void createCtrlScreen(){
   scrCtrl = lv_obj_create(NULL);
@@ -246,6 +280,14 @@ void createCtrlScreen(){
   stopBtnCtrl  = createButton(scrCtrl,LV_SYMBOL_STOP, 45,110,event_handler_btnStop,false);
 
   createHeaterSymbol(scrCtrl,heaterSymbolCtrl);
+  TlabelCtrl = lv_label_create(scrCtrl);
+  lv_label_set_text(TlabelCtrl, "NaN"); // Initial text
+  lv_obj_set_pos(TlabelCtrl, 30, 205);
+  
+  TimeLabelCtrl = lv_label_create(scrCtrl);
+  lv_label_set_text(TimeLabelCtrl, "0"); // Initial text
+  lv_obj_set_pos(TimeLabelCtrl, 30, 195);
+
   
   lv_scr_load(scrCtrl);
    
@@ -327,8 +369,14 @@ void createGraphScreen(){
   stopBtnGraph  = createButton(scrGraph,LV_SYMBOL_STOP, 45,110,event_handler_btnStop,false);
 
   createHeaterSymbol(scrGraph,heaterSymbolGraph);
-  heaterOn(true);
+  TlabelGraph = lv_label_create(scrGraph);
+  lv_label_set_text(TlabelGraph, "NaN"); // Initial text
+  lv_obj_set_pos(TlabelGraph, 30, 205);
   
+  TimeLabelGraph = lv_label_create(scrGraph);
+  lv_label_set_text(TimeLabelGraph, "0"); // Initial text
+  lv_obj_set_pos(TimeLabelGraph, 30, 195);
+
   // lv_obj_refresh_style(heaterSymbolCtrl,LV_PART_ANY,LV_STYLE_PROP_ANY);
 
 }

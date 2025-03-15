@@ -20,16 +20,16 @@ void Controller::controlLoop(){
     if(millis()>=next){
         next +=controlDeltaT;
         value = thermocouple->readCelsius();
-        Serial.print("T: ");
-        Serial.print(value);
-        Serial.print(". Status: ");
-        Serial.print(state);
-        Serial.print(". minValue: ");
-        Serial.print(minValue);
-        Serial.print(". maxValue: ");
-        Serial.print(maxValue);
-        Serial.print(". relayValue: ");
-        Serial.println(relayValue);
+        // Serial.print("T: ");
+        // Serial.print(value);
+        // Serial.print(". Status: ");
+        // Serial.print(state);
+        // Serial.print(". minValue: ");
+        // Serial.print(minValue);
+        // Serial.print(". maxValue: ");
+        // Serial.print(maxValue);
+        // Serial.print(". relayValue: ");
+        // Serial.println(relayValue);
         
         switch(state){
         case 0: // stopped

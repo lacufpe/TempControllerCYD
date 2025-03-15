@@ -55,7 +55,9 @@ extern int timeValues[400];
 extern int setpointValues[400];
 extern int temperatureValues[400];
 extern int setpoint;
-extern int temperaturaAtual, setPoint, heaterStatus;
+extern float temperaturaAtual;
+extern int tempoEmSegundos;
+extern int setPoint, heaterStatus;
 
 extern BetterSlider* setPointSlider;
 extern BetterSlider* hysteresisSLider;
@@ -65,7 +67,7 @@ extern Controller* controller;
 
 extern lv_obj_t * heaterSymbolCtrl;
 extern lv_obj_t * heaterSymbolGraph;
-
+extern void update_Tlabel_task(lv_timer_t *timer);
 // extern lv_style_t onStyle;
 // extern lv_style_t offStyle;
 
