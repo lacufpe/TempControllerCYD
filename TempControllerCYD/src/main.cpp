@@ -5,14 +5,15 @@
 #include "control.h"
 #include "fileAccess.h"
 
-int MaxAcq = 400;
-int timeValues[400];
-int setpointValues[400];
-int temperatureValues[400];
+int MaxAcq = 100;
+int timeValues[100];
+int setpointValues[100];
+int temperatureValues[100];
 int measIdx = 0;
 int tempoEmSegundos, tempoInicio, tempoProximaMedida;
 int deltaT = 1;
 bool aquisicaoAtiva = false; // Verdadeiro se aqdquirindo dados
+bool newValueForChart = false;
 
 String filename;
 
@@ -51,7 +52,8 @@ void setup() {
 
 void loop(){
   controller->controlLoop(); // (from controller.h)
-  temperaturaAtual = controller->getValue(); // get the temperature value of the thermocouple (from controller.h)
+  // temperaturaAtual = controller->getValue(); // get the temperature value of the thermocouple (from controller.h)
+  temperaturaAtual = random(1000);
   heaterStatus = controller->getHeaterStatus(); // And get if the heater is on or off (from controller.h)
   updateScreen(); // from TempCOntrollerCYD_screens.h
   handleNetwork(); // from myWebServer.h
@@ -66,7 +68,8 @@ void loop(){
       timeValues[arrayIdx] = tempoEmSegundos; 
       temperatureValues[arrayIdx] = temperaturaAtual;
       setpointValues[arrayIdx] = setPoint;
-
+      newValueForChart = true;
+      // Serial.println(timeValues[arrayIdx]);
       //Salva no arquivo 
       appendToCSV(filename.c_str(),createCSVLine(tempoEmSegundos,temperaturaAtual,setPoint));
       

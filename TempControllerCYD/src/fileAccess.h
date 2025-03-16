@@ -3,6 +3,12 @@
 #define FILEACCESS_H
 
 #include <SPIFFS.h>
+#include <vector>
+#include <algorithm>
+
+#define QUANT_CSV_FILES 10
+
+void cleanUpOldCSVFiles(void);
 
 void startFS(void);
 

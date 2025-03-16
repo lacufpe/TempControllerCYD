@@ -293,27 +293,33 @@ void createCtrlScreen(){
    
 }
 
+lv_obj_t* chart;
+
 void create_scatter_plot(void) {
     /* Create a chart object */
-    lv_obj_t* chart = lv_chart_create(scrGraph);
+    chart = lv_chart_create(scrGraph);
     lv_obj_set_size(chart, 200, 160); /* Set size */
     lv_obj_align(chart, LV_ALIGN_CENTER, 36, 20); /* Center the chart */
 
     /* Set type of the chart */
-    lv_chart_set_type(chart, LV_CHART_TYPE_SCATTER);
+    // lv_chart_set_type(chart, LV_CHART_TYPE_SCATTER);
+    lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
+    lv_obj_set_style_size(chart, 0, 0, LV_PART_INDICATOR);
 
     /* Set the number of points */
-    lv_chart_set_point_count(chart, POINT_COUNT);
+    lv_chart_set_point_count(chart, 100);
 
     /* Set the range of the chart */
-    lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_X, 0, 1000);
+    lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_X, 0, 100);
     lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 1000);
 
     /* Create a style for the series (optional) */
     static lv_style_t series_style;
     lv_style_init(&series_style);
     lv_style_set_line_width(&series_style, 2);
-    // lv_style_set_ (&series_style, 4); // Adjust point size
+    lv_style_set_radius(&series_style, 0); // Adjust point size
+    lv_style_set_width(&series_style,0);
+    lv_style_set_height(&series_style,0);
     // lv_style_set_point_color(&series_style, lv_palette_main(LV_PALETTE_RED)); // Example color
     lv_style_set_line_color(&series_style, lv_palette_main(LV_PALETTE_RED));   // Line color
     
@@ -324,7 +330,9 @@ void create_scatter_plot(void) {
     static lv_style_t series2_style;
     lv_style_init(&series2_style);
     lv_style_set_line_width(&series2_style, 2);
-    // lv_style_set_point_size(&series2_style, 4);
+    lv_style_set_radius(&series2_style,0);
+    lv_style_set_width(&series2_style,0);
+    lv_style_set_height(&series2_style,0);
     // lv_style_set_point_color(&series2_style, lv_palette_main(LV_PALETTE_BLUE));  // Another color
     lv_style_set_line_color(&series2_style, lv_palette_main(LV_PALETTE_BLUE));    // Line color
 
@@ -332,22 +340,13 @@ void create_scatter_plot(void) {
     setpointSeries = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_BLUE),LV_CHART_AXIS_PRIMARY_Y);
 
 
-    // /* Generate example data (you'll replace this with your actual data) */
-    // lv_coord_t y_values1[POINT_COUNT];
-    // lv_coord_t y_values2[POINT_COUNT];
+    /* Get data */
+    
 
-    // for (int i = 0; i < POINT_COUNT; i++) {
-    //   // Example: Sine wave for series 1
-    //     y_values1[i] = 50 + 40 * sinf(2 * PI * i / POINT_COUNT);
-        
-    //     // Example: Cosine wave for series 2
-    //     y_values2[i] = 50 + 40 * cosf(2 * PI * i / POINT_COUNT);
-    // }
-
-    lv_chart_set_ext_x_array(chart,tempSeries,timeValues);
-    lv_chart_set_ext_x_array(chart,setpointSeries,timeValues);
-    lv_chart_set_ext_y_array(chart,tempSeries,temperatureValues);
-    lv_chart_set_ext_y_array(chart, setpointSeries, setpointValues);
+    // lv_chart_set_ext_x_array(chart,tempSeries,timeValues);
+    // lv_chart_set_ext_x_array(chart,setpointSeries,timeValues);
+    // lv_chart_set_ext_y_array(chart,tempSeries,temperatureValues);
+    // lv_chart_set_ext_y_array(chart, setpointSeries, setpointValues);
 
     /* Set the update mode to SHIFT */
     lv_chart_set_update_mode(chart, LV_CHART_UPDATE_MODE_SHIFT);
@@ -471,6 +470,12 @@ void updateScreen(){
     lv_tick_inc(deltaT);     // tell LVGL how much time has passed
     lastTimeScreenUpdated = now;
     // Serial.println(now);
+    if(newValueForChart){
+      lv_chart_set_next_value(chart, tempSeries, temperaturaAtual);
+      lv_chart_set_next_value(chart, setpointSeries,setPoint);
+      // lv_chart_refresh(chart);
+      newValueForChart = false;
+    }
   }
 }
 

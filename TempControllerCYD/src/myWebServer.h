@@ -7,9 +7,9 @@
 #include <WebSocketsServer.h>
 
 extern int MaxAcq;
-extern int timeValues[400];
-extern int setpointValues[400];
-extern int temperatureValues[400];
+extern int timeValues[100];
+extern int setpointValues[100];
+extern int temperatureValues[100];
 extern int measIdx;
 
 void SPIFFS_test(void);

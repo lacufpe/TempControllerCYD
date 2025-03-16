@@ -51,9 +51,9 @@ extern lv_obj_t *scrComm;
 extern lv_chart_series_t *tempSeries;
 extern lv_chart_series_t *setpointSeries;
 
-extern int timeValues[400];
-extern int setpointValues[400];
-extern int temperatureValues[400];
+extern int timeValues[100];
+extern int setpointValues[100];
+extern int temperatureValues[100];
 extern int setpoint;
 extern float temperaturaAtual;
 extern int tempoEmSegundos;
@@ -68,6 +68,8 @@ extern Controller* controller;
 extern lv_obj_t * heaterSymbolCtrl;
 extern lv_obj_t * heaterSymbolGraph;
 extern void update_Tlabel_task(lv_timer_t *timer);
+extern lv_obj_t* chart;
+extern bool newValueForChart;
 // extern lv_style_t onStyle;
 // extern lv_style_t offStyle;
 
