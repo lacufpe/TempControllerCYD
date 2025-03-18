@@ -52,8 +52,8 @@ void setup() {
 
 void loop(){
   controller->controlLoop(); // (from controller.h)
-  // temperaturaAtual = controller->getValue(); // get the temperature value of the thermocouple (from controller.h)
-  temperaturaAtual = random(1000);
+  temperaturaAtual = controller->getValue(); // get the temperature value of the thermocouple (from controller.h)
+  // temperaturaAtual = random(1000);
   heaterStatus = controller->getHeaterStatus(); // And get if the heater is on or off (from controller.h)
   updateScreen(); // from TempCOntrollerCYD_screens.h
   handleNetwork(); // from myWebServer.h

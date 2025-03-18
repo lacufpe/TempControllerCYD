@@ -19,7 +19,9 @@ Controller::~Controller() {
 void Controller::controlLoop(){
     if(millis()>=next){
         next +=controlDeltaT;
+        oldValue = value;
         value = thermocouple->readCelsius();
+        deltaTemp = 0.8*deltaTemp + 0.2*(value - oldValue);
         // Serial.print("T: ");
         // Serial.print(value);
         // Serial.print(". Status: ");
@@ -36,15 +38,15 @@ void Controller::controlLoop(){
             relayValue = 0;
             break;
         case 1: // on, heating
-            if (value >= maxValue){
+            if ((value + 10*deltaTemp) >= maxValue){
                 state = 2;
                 relayValue = 0;
             } else {
                 relayValue = 1;
             }
             break;
-        case 2: // on, cooling
-            if (value <= minValue){
+        case 2: // off, cooling
+            if ((value + 10*deltaTemp) <= minValue){
                 state = 1;
                 relayValue = 1;
             } else {

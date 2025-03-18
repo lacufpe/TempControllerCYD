@@ -16,6 +16,7 @@ class Controller {
 private:
     MAX6675* thermocouple;
     float value;
+    float oldValue,deltaTemp;
     int relayValue;
     float setPoint;
     float minValue;
